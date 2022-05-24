@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package chatroom;
+import 'record_metadata_options.proto';
+
+message Account {
+  int32 id = 1 [ (webaas.db.record.field).primary_key = true ];
+  string nickname = 2 [ (webaas.db.record.field).index = {} ];
+}
+
+message Message {
+  int32 id = 1 [ (webaas.db.record.field).primary_key = true ];
+  string content = 2;
+  string timestamp = 3;
+  Account account = 4;
+}
+
+message Channel {
+  int32 id = 1 [ (webaas.db.record.field).primary_key = true ];
+  repeated Account accounts = 2;
+  repeated Message messages = 3;
+}
