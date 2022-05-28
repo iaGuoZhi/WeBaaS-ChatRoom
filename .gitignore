@@ -6,4 +6,5 @@
 
 # VIM
 *.swp
+.*
 tags
