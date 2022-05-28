@@ -2,17 +2,14 @@ import threading
 import json
 import random
 import requests
-import uuid
 import chatroom_pb2
-import datetime
+from datetime import datetime
 import asyncio
 import websockets
 import sys
 from cmd import Cmd
+from common.common import *
 
-http_endpoint = "http://202.120.40.82:11232"
-websocket_endpoint = "ws://202.120.40.82:11232"
-appName = "python-crud"+str(uuid.uuid4())  # unique app name
 appID = None
 
 class Client(Cmd):
@@ -27,43 +24,18 @@ class Client(Cmd):
         self.__id = None
         self.__account = None
         # Toy chatroom only support one channel
-        # self.__channel_id = random.getrandbits(16)
         self.__channel_id = 1
         self.__channel = None
         self.__nickname = None
         self.__isLogin = False
         self.__notification_id = None
-        self.__register_webaas()
-        self.create_schema()
+        self.__setup()
 
-    def __register_webaas(self):
-        global appID
-        print("Registering WeBaaS...")
-        r = requests.post(http_endpoint+"/app", params={"appName": appName})
-        if r.status_code == 200:
-            appID = r.json()["appID"]
-            print("App registered with ID: "+appID)
-        else:
-            print("Error registering app: "+r.text)
-            sys.exit(1)
-
-    def create_schema(self):
-        print("Creating WeBaaS schema...")
-        # upload schema file
-        with open("proto/chatroom.proto", "rb") as f:
-            r = requests.put(http_endpoint+"/schema", data=f.read(), params={
-                             "appID": appID, "fileName": "chatroom.proto", "version": "1.0.0"})
-            if r.status_code != 200:
-                print("Error creating schema: "+r.text)
-                sys.exit(1)
-            print("[Client]: WeBaaS schema file uploaded.")
-
-        r = requests.post(http_endpoint+"/schema",
-                      params={"appID": appID, "version": "1.0.0"})
-        if r.status_code != 200:
-            print("[Client]: Error updating schema version: "+r.text)
-            sys.exit(1)
-        print("[Client]: Schema version updated.")
+    def __setup(self):
+        with open("common/appid.txt", "r") as f:
+            global appID
+            appID = f.read()
+        print('[Client]: appID: {}'.format(appID))
 
     def __join_channel(self):
         r = requests.get(http_endpoint+"/query",
@@ -79,7 +51,9 @@ class Client(Cmd):
         channel.ParseFromString(r.content)
         new_account = channel.accounts.add()
         new_account.CopyFrom(self.__account)
-        self.__update_channel(channel)
+        if self.__update_channel(channel):
+            self.__channel = channel
+            self.__isLogin = True
 
     def __listen_channel(self, channel_id):
         # create json
@@ -88,7 +62,6 @@ class Client(Cmd):
                     "schemaName": "chatroom.Channel"}
         r = requests.post(http_endpoint+"/notification",
             data=json.dumps(data_set))
-        print(r)
         if r.status_code != 200:
             print("Error listen channel: "+r.text)
         else:
@@ -102,8 +75,10 @@ class Client(Cmd):
             data=channel.SerializeToString())
         if r.status_code != 200:
             print("Error updating channel: "+r.text)
+            return False
         else:
             print("Channel: {} updated.".format(self.__channel_id))
+            return True
 
     def __create_channel(self):
         # create channel
@@ -139,14 +114,13 @@ class Client(Cmd):
         """
         message = chatroom_pb2.Message()
         message.content = message_body
-        message.timestamp = datetime.now()
-        message.account = self.__account
+        message.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        #message.account = self.__id
 
-        new_message = self.__channel.accounts.add()
+        new_message = self.__channel.messages.add()
         new_message.CopyFrom(message)
 
-        self.update_channel(self.__channel)
-        print("[Client]: message sent")
+        self.__update_channel(self.__channel)
 
     def __create_account(self, nickname):
         account = chatroom_pb2.Account()
@@ -158,7 +132,6 @@ class Client(Cmd):
             print('[Client]: Error creating account: '+r.text)
             sys.exit(1)
 
-        self.__isLogin = True
         self.__nickname = account.nickname
         self.__id = account.id
         self.__account = account
@@ -200,6 +173,9 @@ class Client(Cmd):
         发送消息
         :param args: 参数
         """
+        if not self.__isLogin:
+            print('[Client] Please login')
+            return
         message = args
         # 显示自己发送的消息
         print('[' + str(self.__nickname) + '(' + str(self.__id) + ')' + ']', message)
