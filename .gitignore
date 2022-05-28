@@ -3,4 +3,7 @@
 
 # Python Cache
 /**/__pycache__
+
+# VIM
+*.swp
 tags
