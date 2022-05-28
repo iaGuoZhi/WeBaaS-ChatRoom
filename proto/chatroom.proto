@@ -12,7 +12,7 @@ message Message {
   int32 id = 1 [ (webaas.db.record.field).primary_key = true ];
   string content = 2;
   string timestamp = 3;
-  Account account = 4;
+  string account_name = 4;
 }
 
 message Channel {

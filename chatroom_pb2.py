@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 import record_metadata_options_pb2 as record__metadata__options__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x63hatroom.proto\x12\x08\x43hatRoom\x1a\x1drecord_metadata_options.proto\"5\n\x07\x41\x63\x63ount\x12\x11\n\x02id\x18\x01 \x01(\x05\x42\x05\x8aM\x02\x08\x01\x12\x17\n\x08nickname\x18\x02 \x01(\tB\x05\x8aM\x02\x12\x00\"d\n\x07Message\x12\x11\n\x02id\x18\x01 \x01(\x05\x42\x05\x8aM\x02\x08\x01\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\x12\"\n\x07\x61\x63\x63ount\x18\x04 \x01(\x0b\x32\x11.ChatRoom.Account\"f\n\x07\x43hannel\x12\x11\n\x02id\x18\x01 \x01(\x05\x42\x05\x8aM\x02\x08\x01\x12#\n\x08\x61\x63\x63ounts\x18\x02 \x03(\x0b\x32\x11.ChatRoom.Account\x12#\n\x08messages\x18\x03 \x03(\x0b\x32\x11.ChatRoom.Messageb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x63hatroom.proto\x12\x08\x63hatroom\x1a\x1drecord_metadata_options.proto\"5\n\x07\x41\x63\x63ount\x12\x11\n\x02id\x18\x01 \x01(\x05\x42\x05\x8aM\x02\x08\x01\x12\x17\n\x08nickname\x18\x02 \x01(\tB\x05\x8aM\x02\x12\x00\"V\n\x07Message\x12\x11\n\x02id\x18\x01 \x01(\x05\x42\x05\x8aM\x02\x08\x01\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_name\x18\x04 \x01(\t\"f\n\x07\x43hannel\x12\x11\n\x02id\x18\x01 \x01(\x05\x42\x05\x8aM\x02\x08\x01\x12#\n\x08\x61\x63\x63ounts\x18\x02 \x03(\x0b\x32\x11.chatroom.Account\x12#\n\x08messages\x18\x03 \x03(\x0b\x32\x11.chatroom.Messageb\x06proto3')
 
 
 
@@ -25,21 +25,21 @@ _CHANNEL = DESCRIPTOR.message_types_by_name['Channel']
 Account = _reflection.GeneratedProtocolMessageType('Account', (_message.Message,), {
   'DESCRIPTOR' : _ACCOUNT,
   '__module__' : 'chatroom_pb2'
-  # @@protoc_insertion_point(class_scope:ChatRoom.Account)
+  # @@protoc_insertion_point(class_scope:chatroom.Account)
   })
 _sym_db.RegisterMessage(Account)
 
 Message = _reflection.GeneratedProtocolMessageType('Message', (_message.Message,), {
   'DESCRIPTOR' : _MESSAGE,
   '__module__' : 'chatroom_pb2'
-  # @@protoc_insertion_point(class_scope:ChatRoom.Message)
+  # @@protoc_insertion_point(class_scope:chatroom.Message)
   })
 _sym_db.RegisterMessage(Message)
 
 Channel = _reflection.GeneratedProtocolMessageType('Channel', (_message.Message,), {
   'DESCRIPTOR' : _CHANNEL,
   '__module__' : 'chatroom_pb2'
-  # @@protoc_insertion_point(class_scope:ChatRoom.Channel)
+  # @@protoc_insertion_point(class_scope:chatroom.Channel)
   })
 _sym_db.RegisterMessage(Channel)
 
@@ -57,7 +57,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _ACCOUNT._serialized_start=59
   _ACCOUNT._serialized_end=112
   _MESSAGE._serialized_start=114
-  _MESSAGE._serialized_end=214
-  _CHANNEL._serialized_start=216
-  _CHANNEL._serialized_end=318
+  _MESSAGE._serialized_end=200
+  _CHANNEL._serialized_start=202
+  _CHANNEL._serialized_end=304
 # @@protoc_insertion_point(module_scope)

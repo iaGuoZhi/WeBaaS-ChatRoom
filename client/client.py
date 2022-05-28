@@ -14,10 +14,10 @@ appID = None
 
 class Client(Cmd):
     """
-    客户端
+    WeBaaS chatroom client
     """
     prompt = ''
-    intro = '[Welcome] 简易聊天室客户端(Cli版)\n' + '[Welcome] 输入help来获取帮助\n'
+    intro = '[Welcome] Toy chatroom based on WeBaaS(Cli)\n' + '[Welcome] input help for guidance\n'
 
     def __init__(self):
         super().__init__()
@@ -51,9 +51,27 @@ class Client(Cmd):
         channel.ParseFromString(r.content)
         new_account = channel.accounts.add()
         new_account.CopyFrom(self.__account)
-        if self.__update_channel(channel):
-            self.__channel = channel
+        if self.__push_channel(channel):
             self.__isLogin = True
+
+    def __show_members(self):
+        self.__pull_channel()
+        print(self.__channel.accounts)
+
+    def __show_msgs(self):
+        self.__pull_channel()
+        print(self.__channel.messages)
+
+    def __pull_channel(self):
+        r = requests.get(http_endpoint+"/query",
+            params={"appID": appID, "recordKey": self.__channel_id, "schemaName": "chatroom.Channel"})
+        if r.status_code != 200:
+            print("[Client]: pull channel {} error".format(self.__channel_id))
+            return
+        print("[Client]: channel {} new change pulled".format(self.__channel_id))
+        channel = chatroom_pb2.Channel()
+        channel.ParseFromString(r.content)
+        self.__channel = channel
 
     def __listen_channel(self, channel_id):
         # create json
@@ -68,7 +86,7 @@ class Client(Cmd):
             self.__notification_id = r.json()["notificationID"]
             print("[Client] listen to channel: {}, notificationID: {}".format(self.__channel_id, self.__notification_id))
 
-    def __update_channel(self, channel: chatroom_pb2.Channel):
+    def __push_channel(self, channel: chatroom_pb2.Channel):
         # create channel
         r = requests.post(http_endpoint+"/record", params={
             "appID": appID, "schemaName": "chatroom.Channel"},
@@ -78,6 +96,7 @@ class Client(Cmd):
             return False
         else:
             print("Channel: {} updated.".format(self.__channel_id))
+            self.__channel = channel
             return True
 
     def __create_channel(self):
@@ -94,14 +113,16 @@ class Client(Cmd):
 
     def __receive_message_thread(self):
         """
-        接受消息线程
+        thread for receiving message
         """
         self.__listen_channel(self.__channel_id)
 
         async def listen_to_websocket():
             websocket_url = websocket_endpoint+'/notification?appID={}&notificationID={}'.format(appID, self.__notification_id)
             async with websockets.connect(websocket_url) as websocket:
-                r = await websocket.recv()
+                await websocket.recv()
+                # only support one channel, to need to extract channel id
+                self.__pull_channel()
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -109,18 +130,19 @@ class Client(Cmd):
 
     def __send_message_thread(self, message_body):
         """
-        发送消息线程
-        :param message: 消息内容
+        send message
+        :param message_body: message content
         """
         message = chatroom_pb2.Message()
         message.content = message_body
         message.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        #message.account = self.__id
+        message.account_name = self.__nickname
 
+        self.__pull_channel()
         new_message = self.__channel.messages.add()
         new_message.CopyFrom(message)
 
-        self.__update_channel(self.__channel)
+        self.__push_channel(self.__channel)
 
     def __create_account(self, nickname):
         account = chatroom_pb2.Account()
@@ -139,15 +161,18 @@ class Client(Cmd):
 
     def start(self):
         """
-        启动客户端
+        start client
         """
         self.cmdloop()
 
     def do_login(self, args):
         """
-        登录聊天室
-        :param args: 参数
+        login into chatroom
+        :param args:  param
         """
+        if self.__isLogin:
+            print('[Client] already logined.')
+            return
         try:
             nickname = args.split(' ')[0]
             identity_key = args.split(' ')[1]
@@ -163,39 +188,54 @@ class Client(Cmd):
         self.__create_account(nickname)
         self.__join_channel()
 
-        # 开启子线程用于接受数据
+        # Start child thread to receive messages
         thread = threading.Thread(target=self.__receive_message_thread)
         thread.setDaemon(True)
         thread.start()
 
     def do_send(self, args):
         """
-        发送消息
-        :param args: 参数
+        Send messages
+        :param args: params
         """
         if not self.__isLogin:
             print('[Client] Please login')
             return
         message = args
-        # 显示自己发送的消息
+        # Show this message
         print('[' + str(self.__nickname) + '(' + str(self.__id) + ')' + ']', message)
-        # 开启子线程用于发送数据
+        # Start child thread to send messages
         thread = threading.Thread(target=self.__send_message_thread, args=(message,))
         thread.setDaemon(True)
         thread.start()
 
     def do_logout(self, args=None):
         """
-        登出
-        :param args: 参数
+        Logout
+        :param args: params
         """
+        if not self.__isLogin:
+            print('[Client] Please login')
+            return
         self.__isLogin = False
         return True
 
+    def do_listuser(self, args=None):
+        if not self.__isLogin:
+            print('[Client] Please login')
+            return
+        self.__show_members()
+
+    def do_listmsg(self, args=None):
+        if not self.__isLogin:
+            print('[Client] Please login')
+            return
+        self.__show_msgs()
+
     def do_help(self, arg):
         """
-        帮助
-        :param arg: 参数
+        Help
+        :param arg: params
         """
         command = arg.split(' ')[0]
         if command == '':
@@ -206,6 +246,10 @@ class Client(Cmd):
             print('[Help] login nickname - 登录到聊天室，nickname是你选择的昵称')
         elif command == 'send':
             print('[Help] send message - 发送消息，message是你输入的消息')
+        elif command == 'listuser':
+            print('[Help] listuser - 查看聊天室成员')
+        elif command == 'listmeg':
+            print('[Help] listmsg - 查看所有消息')
         elif command == 'logout':
             print('[Help] logout - 退出聊天室')
         else:
