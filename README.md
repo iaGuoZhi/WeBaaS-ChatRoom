@@ -5,7 +5,7 @@
 
 # 预览
 
-![Preview](./doc/preview.gif)
+![Preview](./doc/preview.mov)
 
 # 运行前要求
 
