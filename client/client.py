@@ -219,7 +219,7 @@ class Client(Cmd):
             return
         message = args
         # Clear user input line
-        print ("\033[A                             \033[A")
+        print("\033[A                             \033[A")
         # Show this message
         print("me:\t{}".format(message))
         # Start child thread to send messages
