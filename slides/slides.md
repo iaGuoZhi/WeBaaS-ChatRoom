@@ -35,8 +35,7 @@ footer: ""
 ## Outline
 
 - Project Overview
-- DXE_RUNTIME driver
-- Linux call runtime service
+- Disign and implementation
 - Summary
 
 ---
