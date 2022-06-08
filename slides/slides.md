@@ -23,7 +23,7 @@ footer: "Presented by Zhi Guo"
 
 # A ChatRoom based on WeBaaS
 
-v1.0
+group 5
 
 ---
 
@@ -54,10 +54,11 @@ backgroundImage: url('assets/bg.png')
 
 ## Project Overview
 
+Our front-end is command-line-based which is a typical IRC style.
+
 Our chatroom support real time communication, password mechanism, chat history display, member display. 
 
 We used 6 WeBaaS APIs: app, schema, query, record, notification register, and notification listen.
-
 
 ---
 
@@ -86,7 +87,6 @@ backgroundImage: url('assets/bg.png')
 
 ## Proto structure
 
-Three table: Account, Message and Channel
 ![](./image/proto_structure.png)
 
 ---
@@ -139,7 +139,6 @@ User can query history message by `listmsg` command.
 
 Use Python cmd package to handle different commands.
 
-
 ---
 
 
@@ -168,4 +167,11 @@ ZDX: proto design and message send.
 
 ---
 
+## LoC
+
+350 lines of python.
+
+---
+
 Thanks for your attentation!
+
