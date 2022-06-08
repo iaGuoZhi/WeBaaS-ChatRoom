@@ -259,6 +259,8 @@ class Client(Cmd):
         if command == '':
             print('[Help] login nickname identity - 登录到聊天室，nickname是你选择的昵称，identity是channel的密钥')
             print('[Help] send message - 发送消息，message是你输入的消息')
+            print('[Help] listuser - 查看聊天室成员')
+            print('[Help] listmsg - 查看所有消息')
             print('[Help] logout - 退出聊天室')
         elif command == 'login':
             print('[Help] login nickname identity - 登录到聊天室，nickname是你选择的昵称，identity是channel的密钥')
